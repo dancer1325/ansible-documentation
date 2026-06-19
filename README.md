@@ -1,16 +1,18 @@
 # ansible-documentation
 
-This repository holds the ReStructuredText (RST) source, and other files, for user documentation related to the Ansible package and Ansible Core.
+* goal
+  * Ansible package's documentation
+  * Ansible Core's documentation
+    * ⚠️if you want Ansible modules & plugins documentation -> [here](https://github.com/ansible/ansible)⚠️
 
-> Documentation for modules and plugins that are officially supported by the Ansible Core engineering team is available in the [`ansible/ansible`](https://github.com/ansible/ansible) repository.
+## documentation
+
+* [here](docs/docsite/README.md)
 
 ## Verifying your pull request
 
-We welcome all contributions to Ansible community documentation.
-If you plan to submit a pull request with changes, you should [verify your PR](https://docs.ansible.com/ansible/latest/community/documentation_contributions.html#verifying-your-documentation-pr) to ensure it conforms with style guidelines and can build successfully.
-
 ### Setting up nox
-
+TODO: 
 This project includes a `nox` configuration to automate tests, checks, and other functions.
 You can use these automated tests to help you verify changes before you submit a PR.
 You can manually

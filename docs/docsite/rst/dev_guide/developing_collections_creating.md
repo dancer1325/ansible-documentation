@@ -1,0 +1,161 @@
+.. _creating_collections:
+
+********************
+Creating collections
+********************
+
+To create a collection:
+
+#. Create a :ref:`new collection<creating_new_collections>`, optionally using a custom :ref:`collection template<creating_collection_from_custom_template>`, with the ``ansible-galaxy collection init`` command.
+#. Add modules and other content to the collection.
+#. Build the collection into a collection artifact with :ref:`ansible-galaxy collection build<building_collections>`.
+#. Publish the collection artifact to Galaxy with :ref:`ansible-galaxy collection publish<publishing_collections>`.
+
+A user can then install your collection on their systems.
+
+.. contents::
+   :local:
+   :depth: 2
+
+Naming your collection
+======================
+
+Collection names consist of a namespace and a name, separated by a period (``.``). Both namespace and name should be valid Python identifiers. This means that they should consist of ASCII letters, digits, and underscores.
+
+.. note::
+
+    Usually namespaces and names use lower-case letters, digits, and underscores, but no upper-case letters.
+
+You should check `Ansible Galaxy's namespace list <https://galaxy.ansible.com/ui/namespaces/>`_ to ensure that your desired namespace is not already registered.
+If you use a namespace or full collection name that conflicts with another collection on Galaxy, then the ``ansible-galaxy collection install`` can install the wrong collection.
+
+There are a few special namespaces:
+
+:ansible:
+
+  The `ansible namespace <https://galaxy.ansible.com/ui/namespaces/ansible/>`_ is owned by Red Hat and reserved for official Ansible collections. Two special members are the synthetic ``ansible.builtin`` and ``ansible.legacy`` collections. These cannot be found on Ansible Galaxy, but are built-in into ansible-core.
+
+:community:
+
+  The `community namespace <https://galaxy.ansible.com/ui/namespaces/community/>`_ is owned by the Ansible community. Collections from this namespace generally live in the `GitHub ansible-collection organization <https://github.com/ansible-collections/>`_. If you want to create a collection in this namespace, :ref:`request<request_coll_repo>` it on the forum.
+
+:local:
+
+  The `local namespace <https://galaxy.ansible.com/ui/namespaces/local/>`_ does not contain any collection on Ansible Galaxy, and the intention is that this will never change. You can use the ``local`` namespace for collections that are locally on your machine or locally in your Git repositories, without having to fear collisions with actually existing collections on Ansible Galaxy.
+
+To request a new namespace in Galaxy, do the following:
+
+#. Log in to the `Ansible forum <https://forum.ansible.com>`_.
+#. Submit a `namespace request <https://forum.ansible.com/new-topic?category=project&tags=galaxy-nspace-request&title=namespace%3A%20FIXME&body=%23%23%20Namespace%20Request%0ANamespace%3A%20%0A%0A%23%23%20Description%0AProvide%20us%20one%20line%20description%2C%20will%20be%20visible%20in%20Galaxy%0A%0A%23%23%20GitHub%20Org%20Link%0AProvide%20us%20with%20a%20link%20to%20your%20GitHub%20org%0A%0A%23%23%20Admins%0AProvide%20us%20with%20a%20list%20of%20Galaxy%20users%20who%20you%20would%20like%20to%20set%20up%20as%20admins%20on%20this%20namespace%0AEnsure%20each%20admin%20has%20logged%20into%20galaxy.ansible.com%2C%20which%20will%20create%20their%20user%20account>`_.
+
+The Red Hat Community and Partner Engineering team will be notified of your namespace request and create it for you.
+
+..
+  The details about requesting namespaces are also part of docs/docsite/rst/community/collection_contributors/collection_requirements.rst.
+  If you update the preceding section, you should also make your changes in collection_requirements.rst.
+
+.. _creating_new_collections:
+
+Creating a new collection
+=========================
+
+Create your collection skeleton in a path that includes ``ansible_collections``, for example `collections/ansible_collections/`.
+
+
+To start a new collection, run the following command in your collections directory:
+
+.. code-block:: bash
+
+    ansible_collections#> ansible-galaxy collection init my_namespace.my_collection
+
+.. note::
+
+	Both the namespace and collection names use the same strict set of requirements. Both are limited to alphanumeric characters and underscores, must have a minimum length of three characters, and cannot start with an underscore.
+
+It will create the structure ``[my_namespace]/[my_collection]/[collection skeleton]``.
+
+.. hint:: If Git is used for version control, the corresponding repository should be initialized in the collection directory.
+
+Once the collection exists, you can populate the directories with the content you want inside the collection. See `ansible-collections <https://github.com/ansible-collections/>`_ GitHub Org to get a better idea of what you can place inside a collection.
+
+Reference: the ``ansible-galaxy collection`` command
+
+Currently the ``ansible-galaxy collection`` command implements the following sub commands:
+
+* ``init``: Create a basic collection based on the default template included with Ansible or your own template.
+* ``build``: Create a collection artifact that can be uploaded to Galaxy or your own repository.
+* ``publish``: Publish a built collection artifact to Galaxy.
+* ``install``: Install one or more collections.
+
+To learn more about the ``ansible-galaxy`` command-line tool, see the :ref:`ansible-galaxy` man page.
+
+.. _creating_collection_from_custom_template:
+
+Creating a collection from a custom template
+============================================
+
+The built-in collection template is a simple example of a collection that works with ``ansible-core``, but if you want to simplify your development process you may want to create a custom collection template to pass to ``ansible-galaxy collection init``.
+
+A collection skeleton is a directory that looks like a collection directory but any ``.j2`` files (excluding those in ``templates/`` and ``roles/*/templates/``) will be templated by ``ansible-galaxy collection init``. The skeleton's ``galaxy.yml.j2`` file should use the variables ``namespace`` and ``collection_name`` which are derived from ``ansible-galaxy init namespace.collection_name``, and will populate the metadata in the initialized collection's ``galaxy.yml`` file. There are a few additional variables available by default (for example, ``version`` is ``1.0.0``), and these can be supplemented/overridden using ``--extra-vars``.
+
+An example ``galaxy.yml.j2`` file that accepts an optional dictionary variable ``dependencies`` could look like this:
+
+.. code-block:: jinja
+
+   namespace: {{ namespace }}
+   name: {{ collection_name }}
+   version: {{ (version|quote) is version('0.0.0', operator='gt', version_type='semver')|ternary(version, undef('version must be a valid semantic version greater than 0.0.0')) }}
+   dependencies: {{ dependencies | default({}, true) }}
+
+To initialize a collection using the new template, pass the path to the skeleton with ``ansible-galaxy collection init``:
+
+.. code-block:: bash
+
+   ansible_collections#> ansible-galaxy collection init --collection-skeleton /path/to/my/namespace/skeleton --extra-vars "@my_vars_file.json" my_namespace.my_collection
+
+You can configure the collection skeleton using ``collection_skeleton`` in ``ansible.cfg``.
+To ignore files and directories in the collection skeleton, use the ``collection_skeleton_ignore`` option in ``ansible.cfg``.
+
+.. code-block:: ini
+
+   [galaxy]
+   collection_skeleton = /path/to/collection_skeleton
+   collection_skeleton_ignore = ^.git$,^.*/.git_keep$,^\./CLAUDE\.md$
+
+The ``collection_skeleton_ignore`` option is a list of regular expressions to match files and directories to ignore.
+The regex are matched against the relative path of the file or directory from the skeleton directory.
+
+.. note::
+
+   Before ``ansible-core`` 2.17, collection skeleton templating is limited to the few hardcoded variables including ``namespace``, ``collection_name``, and ``version``.
+
+.. note::
+
+   The default collection skeleton uses an internal filter ``comment_ify`` that isn't accessibly to ``--collection-skeleton``. Use ``ansible-doc -t filter|test --list`` to see available plugins.
+
+.. _creating_collection_with_ansible-creator:
+
+Creating collections with ansible-creator
+=========================================
+
+`ansible-creator <https://ansible.readthedocs.io/projects/creator/>`_ is designed to quickly scaffold an Ansible collection project.
+
+.. note::
+
+   The `Ansible Development Tools <https://ansible.readthedocs.io/projects/dev-tools/>`_ package offers a convenient way to install ``ansible-creator`` along with a curated set of tools for developing automation content.
+
+After `installing <https://ansible.readthedocs.io/projects/creator/installing>`_ ``ansible-creator`` you can initialize a project in one of the following ways:
+
+* Use the ``init`` subcommand.
+* Use ``ansible-creator`` with the `Ansible extension <https://ansible.readthedocs.io/projects/creator/collection_creation/#step-1-installing-ansible-creator-in-the-environment>`_ in Visual Studio Code.
+
+.. seealso::
+
+   :ref:`collections`
+       Learn how to install and use collections.
+   :ref:`collection_structure`
+       Directories and files included in the collection skeleton
+   `Ansible Development Tools (ADT) <https://ansible.readthedocs.io/projects/dev-tools/>`_
+       Python package of tools to create and test Ansible content.
+   :ref:`Communication<communication>`
+       Got questions? Need help? Want to share your ideas? Visit the Ansible communication guide
