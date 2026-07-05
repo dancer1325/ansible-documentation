@@ -5,9 +5,7 @@
 Installing Ansible
 ******************
 
-* Ansible is an agentless automation tool that you install on a single host (referred to as the control node).
-
-From the control node, Ansible can manage an entire fleet of machines and other devices (referred to as managed nodes) remotely with SSH, Powershell remoting, and numerous other transports, all from a simple command-line interface with no databases or daemons required.
+remotely with SSH, Powershell remoting, and numerous other transports,
 
 .. contents::
   :local:
@@ -17,7 +15,10 @@ From the control node, Ansible can manage an entire fleet of machines and other 
 Control node requirements
 =========================
 
-For your *control* node (the machine that runs Ansible), you can use nearly any UNIX-like machine with Python installed. This includes Red Hat, Debian, Ubuntu, macOS, BSDs, and Windows under a `Windows Subsystem for Linux (WSL) distribution <https://docs.microsoft.com/en-us/windows/wsl/about>`_. Windows without WSL is not natively supported as a control node; see `Matt Davis' blog post <http://blog.rolpdog.com/2020/03/why-no-ansible-controller-for-windows.html>`_ for more information.
+For your *control* node (the machine that runs Ansible), 
+you can use nearly any UNIX-like machine with Python installed
+* This includes Red Hat, Debian, Ubuntu, macOS, BSDs, and Windows under a `Windows Subsystem for Linux (WSL) distribution <https://docs.microsoft.com/en-us/windows/wsl/about>`_
+* Windows without WSL is not natively supported as a control node; see `Matt Davis' blog post <http://blog.rolpdog.com/2020/03/why-no-ansible-controller-for-windows.html>`_ for more information.
 
 .. _managed_node_requirements:
 
@@ -29,7 +30,9 @@ The managed node also needs a user account that can connect through SSH to the n
 
 .. note::
 
-   There can be exceptions in module requirements. For example, network modules do not require Python on the managed device. See documentation for the modules you use.
+   There can be exceptions in module requirements
+* For example, network modules do not require Python on the managed device
+* See documentation for the modules you use.
 
 .. _node_requirements_summary:
 
